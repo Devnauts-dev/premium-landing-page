@@ -170,14 +170,30 @@ export default function HorizontalScrollSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
+
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   useGSAP(() => {
-    if (!sectionRef.current || !trackRef.current) return;
+    if (!sectionRef.current || !trackRef.current || isMobile) return;
 
     const track = trackRef.current;
-    const totalScrollWidth = track.scrollWidth - window.innerWidth;
+    const totalScrollWidth = Math.max(0, track.scrollWidth - window.innerWidth);
+    if (totalScrollWidth <= 0) return;
 
-    gsap.to(track, {
+    const tween = gsap.to(track, {
       x: -totalScrollWidth,
       ease: 'none',
       scrollTrigger: {
@@ -189,13 +205,65 @@ export default function HorizontalScrollSection() {
         invalidateOnRefresh: true,
       },
     });
-  });
+
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, { dependencies: [isMobile] });
+
+  const renderCard = (card: ScrollCard, i: number, useViewportHeight: boolean) => (
+    <div
+      key={i}
+      ref={(el) => { cardRefs.current[i] = el; }}
+      className={`flex shrink-0 items-center justify-center px-[clamp(20px,4vw,60px)] ${useViewportHeight ? 'h-screen w-screen' : 'w-full py-3'}`}
+    >
+      <div className="mx-auto w-full max-w-[1280px]">
+        <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#0d1110]/80 backdrop-blur-sm">
+          <div className="flex min-h-[520px] max-[768px]:min-h-0 max-[768px]:flex-col">
+            <div className="relative flex-[1.2] overflow-hidden max-[768px]:min-h-[280px]">
+              <div className="absolute inset-3 overflow-hidden rounded-[18px]">
+                <CardMedia media={card.media} />
+              </div>
+            </div>
+
+            <div className="flex flex-1 flex-col justify-center px-[clamp(28px,4vw,56px)] py-[clamp(32px,4vw,56px)] max-[768px]:py-8">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#C9A96E]/30 bg-[#C9A96E]/10 text-[#C9A96E]">
+                  {card.icon}
+                </div>
+                <h2 className="text-[clamp(1.3rem,2.5vw,1.8rem)] font-medium leading-[1.2] tracking-[-0.01em] text-white/90">
+                  {card.title}
+                </h2>
+              </div>
+
+              <p className="text-[clamp(0.85rem,1.1vw,0.95rem)] font-light leading-[1.75] text-white/50">
+                {card.description}
+              </p>
+
+              <ul className="mt-6 space-y-3">
+                {card.bullets.map((bullet, j) => (
+                  <li key={j} className="flex items-start gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C9A96E]" />
+                    <span className="text-[clamp(0.82rem,1vw,0.9rem)] font-light leading-[1.6] text-white/60">
+                      {bullet}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <section
       ref={sectionRef}
+      id="craft"
       aria-label="Our Craft"
-      className="relative z-30 overflow-hidden"
+      className="relative z-30 overflow-hidden scroll-mt-28"
     >
       {/* Glassmorphism background */}
       <div className="absolute inset-0 bg-[#081a14]" />
@@ -233,77 +301,39 @@ export default function HorizontalScrollSection() {
         }}
       />
 
-      {/* Horizontal track */}
-      <div
-        ref={trackRef}
-        className="relative z-10 flex h-screen w-max items-center"
-        style={{ willChange: 'transform' }}
-      >
-        {/* Title card */}
-        <div className="flex h-screen w-screen shrink-0 items-center justify-center">
-          <div className="animate-title-fade text-center">
-            <h2 className="text-[clamp(2.8rem,6.5vw,5.5rem)] font-light leading-[1.08] tracking-[-0.02em] text-white/90">
-              <span className="animate-title-line inline-block">We Craft</span>
-              <br />
-              <span className="animate-title-line-delayed inline-block">With Mastery</span>
+      {isMobile ? (
+        <div className="relative z-10 mx-auto w-[min(1380px,calc(100%-36px))] py-[clamp(64px,12vw,96px)]">
+          <div className="mb-8 text-center">
+            <h2 className="text-[clamp(2.2rem,9vw,3.2rem)] font-light leading-[1.08] tracking-[-0.02em] text-white/90">
+              We Craft With Mastery
             </h2>
-            <div className="animate-title-divider mx-auto mt-8 h-px w-20 bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent" />
+            <div className="mx-auto mt-5 h-px w-16 bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent" />
+          </div>
+
+          <div className="space-y-4">
+            {cards.map((card, i) => renderCard(card, i, false))}
           </div>
         </div>
-
-        {/* Content cards */}
-        {cards.map((card, i) => (
-          <div
-            key={i}
-            ref={(el) => { cardRefs.current[i] = el; }}
-            className="flex h-screen w-screen shrink-0 items-center justify-center px-[clamp(20px,4vw,60px)]"
-          >
-            <div className="mx-auto w-full max-w-[1280px]">
-              {/* Card container */}
-              <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#0d1110]/80 backdrop-blur-sm">
-                <div className="flex min-h-[520px] max-[768px]:flex-col">
-                  {/* Media side */}
-                  <div className="relative flex-[1.2] overflow-hidden max-[768px]:min-h-[280px]">
-                    <div className="absolute inset-3 overflow-hidden rounded-[18px]">
-                      <CardMedia media={card.media} />
-                    </div>
-                  </div>
-
-                  {/* Content side */}
-                  <div className="flex flex-1 flex-col justify-center px-[clamp(28px,4vw,56px)] py-[clamp(32px,4vw,56px)] max-[768px]:py-8">
-                    {/* Icon + Title */}
-                    <div className="mb-5 flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#C9A96E]/30 bg-[#C9A96E]/10 text-[#C9A96E]">
-                        {card.icon}
-                      </div>
-                      <h2 className="text-[clamp(1.3rem,2.5vw,1.8rem)] font-medium leading-[1.2] tracking-[-0.01em] text-white/90">
-                        {card.title}
-                      </h2>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-[clamp(0.85rem,1.1vw,0.95rem)] font-light leading-[1.75] text-white/50">
-                      {card.description}
-                    </p>
-
-                    {/* Bullets */}
-                    <ul className="mt-6 space-y-3">
-                      {card.bullets.map((bullet, j) => (
-                        <li key={j} className="flex items-start gap-3">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C9A96E]" />
-                          <span className="text-[clamp(0.82rem,1vw,0.9rem)] font-light leading-[1.6] text-white/60">
-                            {bullet}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
+      ) : (
+        <div
+          ref={trackRef}
+          className="relative z-10 flex h-screen w-max items-center"
+          style={{ willChange: 'transform' }}
+        >
+          <div className="flex h-screen w-screen shrink-0 items-center justify-center">
+            <div className="animate-title-fade text-center">
+              <h2 className="text-[clamp(2.8rem,6.5vw,5.5rem)] font-light leading-[1.08] tracking-[-0.02em] text-white/90">
+                <span className="animate-title-line inline-block">We Craft</span>
+                <br />
+                <span className="animate-title-line-delayed inline-block">With Mastery</span>
+              </h2>
+              <div className="animate-title-divider mx-auto mt-8 h-px w-20 bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent" />
             </div>
           </div>
-        ))}
-      </div>
+
+          {cards.map((card, i) => renderCard(card, i, true))}
+        </div>
+      )}
     </section>
   );
 }

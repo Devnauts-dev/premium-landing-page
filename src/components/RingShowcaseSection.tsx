@@ -9,7 +9,7 @@ const highlights = [
 
 export default function RingShowcaseSection() {
   return (
-    <section aria-label="Signature Piece" className="relative z-30 overflow-hidden bg-[#061411]">
+    <section id="signature" aria-label="Signature Piece" className="relative z-30 overflow-hidden bg-[#061411] scroll-mt-28">
       <div
         className="absolute inset-0 opacity-30"
         style={{

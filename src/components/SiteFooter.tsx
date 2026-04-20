@@ -1,10 +1,18 @@
 import { FadeIn } from './FadeIn';
 
-const footerLinks = ['Home', 'About', 'Why Us', 'Services', 'Contact Us'];
+const footerLinks = [
+  { label: 'Home', href: '#home' },
+  { label: 'About', href: '#about' },
+  { label: 'Ecosystem', href: '#ecosystem' },
+  { label: 'Craft', href: '#craft' },
+  { label: 'Approach', href: '#approach' },
+  { label: 'Signature', href: '#signature' },
+  { label: 'Contact', href: '#contact' },
+];
 
 export default function SiteFooter() {
   return (
-    <footer aria-label="Site Footer" className="relative z-30 overflow-hidden border-t border-white/5 bg-[#04100d]">
+    <footer id="contact" aria-label="Site Footer" className="relative z-30 overflow-hidden border-t border-white/5 bg-[#04100d] scroll-mt-28">
       <div
         className="absolute inset-0 opacity-20"
         style={{
@@ -32,11 +40,11 @@ export default function SiteFooter() {
               <div className="mt-4 space-y-3">
                 {footerLinks.map((link) => (
                   <a
-                    key={link}
-                    href="#"
+                    key={link.href}
+                    href={link.href}
                     className="block text-[0.96rem] font-light text-white/72 no-underline transition-colors duration-200 hover:text-[#E2C991]"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 ))}
               </div>

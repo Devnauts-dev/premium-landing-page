@@ -1,8 +1,8 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MessageCircle, Palette, Users, Gem, Lightbulb } from 'lucide-react';
+import { Palette, Users, Gem, Lightbulb, Menu, X } from 'lucide-react';
 import watchHeroImage from './assets/ring.avif';
 import AnimatedGradientBackground from './components/AnimatedGradientBackground';
 import EcosystemCard from './components/EcosystemCard';
@@ -17,6 +17,29 @@ function App() {
   const aboutTextRef = useRef<HTMLDivElement>(null);
   const ecosystemSectionRef = useRef<HTMLElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navItems = [
+    { label: 'Home', href: '#home' },
+    { label: 'About', href: '#about' },
+    { label: 'Ecosystem', href: '#ecosystem' },
+    { label: 'Craft', href: '#craft' },
+    { label: 'Approach', href: '#approach' },
+    { label: 'Signature', href: '#signature' },
+    { label: 'Contact', href: '#contact' },
+  ];
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useGSAP(() => {
     if (!imageRef.current || !aboutTextRef.current) return;
@@ -108,7 +131,7 @@ function App() {
       <AnimatedGradientBackground />
 
       {/* Global fixed header */}
-      <header className="fixed top-0 left-0 right-0 z-50 mx-auto flex items-center justify-between w-[min(1380px,calc(100%-64px))] gap-5 pt-[18px] max-[1100px]:w-[calc(100%-36px)] max-[1100px]:grid-cols-[auto_auto] max-[1100px]:gap-y-4">
+      <header className="fixed top-0 left-0 right-0 z-50 mx-auto flex items-center justify-between w-[min(1380px,calc(100%-64px))] gap-5 pt-[18px] max-[1100px]:w-[calc(100%-36px)] max-[768px]:w-[calc(100%-24px)] max-[1100px]:justify-between">
         <div className="flex items-center gap-[10px] justify-self-start text-[#e1d5b6] max-[1100px]:order-1">
           <div className="flex flex-col gap-[2px] text-[26px] font-medium leading-[0.84] tracking-[0.04em] max-[768px]:text-[22px]">
             <span>ERTOA</span>
@@ -122,33 +145,55 @@ function App() {
 
         <nav
           aria-label="Primary"
-          className="flex items-center gap-[clamp(22px,2.3vw,48px)] max-[1100px]:static max-[1100px]:order-3 max-[1100px]:col-span-2 max-[1100px]:translate-x-0 max-[1100px]:justify-center max-[1100px]:gap-x-[22px] max-[1100px]:gap-y-4 max-[1100px]:flex-wrap"
+          className="flex items-center gap-[clamp(18px,2.1vw,38px)] max-[1100px]:static max-[1100px]:translate-x-0 max-[1100px]:justify-center max-[1100px]:gap-x-[18px] max-[1100px]:gap-y-3 max-[1100px]:flex-wrap max-[768px]:hidden"
         >
-          <a className="text-[13px] font-light text-white/86 no-underline transition-colors duration-200 hover:text-[#f1e4c5] max-[768px]:text-[12px]" href="#">HOME</a>
-          <a className="text-[13px] font-light text-white/86 no-underline transition-colors duration-200 hover:text-[#f1e4c5] max-[768px]:text-[12px]" href="#">ABOUT</a>
-          <a className="text-[13px] font-light text-white/86 no-underline transition-colors duration-200 hover:text-[#f1e4c5] max-[768px]:text-[12px]" href="#">WHY US</a>
-          <a className="text-[13px] font-light text-white/86 no-underline transition-colors duration-200 hover:text-[#f1e4c5] max-[768px]:text-[12px]" href="#">SERVICES</a>
-          <a className="text-[13px] font-light text-white/86 no-underline transition-colors duration-200 hover:text-[#f1e4c5] max-[768px]:text-[12px]" href="#">CONTACT US</a>
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              className="text-[13px] font-light uppercase tracking-[0.06em] text-white/86 no-underline transition-colors duration-200 hover:text-[#f1e4c5] max-[768px]:text-[11px]"
+              href={item.href}
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
 
-        <div
-          role="group"
-          aria-label="Language switch"
-          className="inline-flex justify-self-end items-center gap-1.5 rounded-full border border-white/15 bg-white/7 p-1.5 backdrop-blur-[10px] max-[1100px]:order-2"
+        <button
+          type="button"
+          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-primary-nav"
+          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          className="hidden h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/35 text-white/85 backdrop-blur-[6px] transition-colors duration-200 hover:border-white/30 max-[768px]:inline-flex"
         >
-          <button
-            type="button"
-            className="h-[34px] w-[34px] rounded-full border border-white/16 bg-black/40 text-[12px] font-bold text-white/90"
-          >EN</button>
-          <button
-            type="button"
-            className="h-[34px] w-[34px] rounded-full bg-transparent text-[12px] font-bold text-white/90"
-          >AR</button>
-        </div>
+          {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
+
+        {isMobileMenuOpen ? (
+          <nav
+            id="mobile-primary-nav"
+            aria-label="Mobile Primary"
+            className="absolute left-0 right-0 top-[calc(100%+10px)] hidden rounded-[18px] border border-white/10 bg-[#070e0d]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-[14px] max-[768px]:block"
+          >
+            <ul className="flex list-none flex-col gap-1">
+              {navItems.map((item) => (
+                <li key={`mobile-${item.href}`}>
+                  <a
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block rounded-[12px] px-3 py-3 text-[12px] font-medium uppercase tracking-[0.12em] text-white/82 no-underline transition-colors duration-200 hover:bg-white/[0.04] hover:text-[#f1e4c5]"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
       </header>
 
       {/* ===== HERO SECTION ===== */}
-      <section aria-label="Hero" className="relative h-screen">
+      <section id="home" aria-label="Hero" className="relative h-screen scroll-mt-28">
         <div className="pt-[80px]">
           <div className="h-[120px] max-[1100px]:h-[100px] max-[768px]:h-[23vh]" />
 
@@ -176,7 +221,7 @@ function App() {
       </section>
 
       {/* ===== ABOUT SECTION ===== */}
-      <section aria-label="About" className="relative h-screen">
+      <section id="about" aria-label="About" className="relative h-screen scroll-mt-28">
         <div className="pt-[80px]">
           <div className="h-[18vh]" />
 
@@ -210,7 +255,7 @@ function App() {
 
 
       {/* ===== ECOSYSTEM SECTION ===== */}
-      <section ref={ecosystemSectionRef} aria-label="Ecosystem" className="relative h-screen">
+      <section id="ecosystem" ref={ecosystemSectionRef} aria-label="Ecosystem" className="relative h-screen scroll-mt-28">
         <div className="relative mx-auto flex h-full w-[min(1380px,calc(100%-64px))] items-center justify-center max-[1100px]:w-[calc(100%-36px)]">
           {/* Cards grid */}
           <div className="relative z-20 grid h-full w-full grid-cols-2 grid-rows-2 gap-6 py-16 max-[768px]:grid-cols-1 max-[768px]:grid-rows-4 max-[768px]:gap-4">
@@ -266,19 +311,6 @@ function App() {
       <ApproachSection />
       <RingShowcaseSection />
       <SiteFooter />
-
-      {/* WhatsApp button */}
-      <button
-        type="button"
-        className="fixed right-[clamp(18px,2.5vw,36px)] bottom-[clamp(22px,3.2vw,36px)] z-20 grid h-[72px] w-[72px] place-items-center rounded-full border border-white/30 bg-white/10 text-white shadow-[0_8px_28px_rgba(0,0,0,0.45)] backdrop-blur-[10px] transition-transform duration-200 hover:scale-[1.02] max-[768px]:h-[62px] max-[768px]:w-[62px]"
-        aria-label="Open WhatsApp"
-      >
-        <MessageCircle
-          aria-hidden="true"
-          className="h-8 w-8 max-[768px]:h-7 max-[768px]:w-7"
-          strokeWidth={2.2}
-        />
-      </button>                                                                                         
 
     </main>
   );

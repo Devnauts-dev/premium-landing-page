@@ -72,8 +72,9 @@ export default function ApproachSection() {
   return (
     <section
       ref={sectionRef}
+      id="approach"
       aria-label="Our Approach To Mastery"
-      className="relative z-30 overflow-hidden bg-[#081a14]"
+      className="relative z-30 overflow-hidden bg-[#081a14] scroll-mt-28"
     >
       {/* Background layers */}
       <div className="absolute inset-0 bg-[#081a14]" />
